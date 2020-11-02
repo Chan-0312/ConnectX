@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 from ConnectXEnv.ConnectX_Game import ConnectX_Gym
 from QTable.Q_Table import QLearning, Sarsa
 from tqdm import tqdm
