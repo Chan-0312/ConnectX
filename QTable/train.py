@@ -11,7 +11,7 @@ rl_flag = 'QLearning'    # rl_flag {'Sarsa', 'QLearning'}
 board_size = (4, 4)      # 棋盘尺寸
 qtable_path = './q_table44.pkl' # 模型保存路径
 display = False          # 是否显示棋盘
-episodes = 500000        # 迭代次数
+episodes = 2000000        # 迭代次数
 
 
 env = ConnectX_Gym(rows=board_size[0], columns=board_size[1], inarow=4)
