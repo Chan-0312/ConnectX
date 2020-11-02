@@ -8,6 +8,9 @@ from random import shuffle
 import numpy as np
 from tqdm import tqdm
 
+import sys
+sys.path.append('..')
+
 from AlphaZero.Arena import Arena
 from AlphaZero.MCTS import MCTS
 

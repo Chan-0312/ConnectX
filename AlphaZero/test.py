@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 import AlphaZero.Arena as Arena
 from AlphaZero.MCTS import MCTS
 from ConnectXEnv.ConnectX_Game import ConnectX_AlphaZero

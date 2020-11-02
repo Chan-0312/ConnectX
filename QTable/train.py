@@ -20,13 +20,13 @@ print('env_configuration: ',env.configuration)
 if rl_flag == 'Sarsa':
     RL = Sarsa(action_scope=env.configuration['columns'],
                learning_rate=0.1,
-               reward_decay=0.9,
-               e_greedy=0.9)
+               reward_decay=0.95,
+               e_greedy=0.95)
 else:
     RL = QLearning(action_scope=env.configuration['columns'],
                    learning_rate=0.1,
-                   reward_decay=0.9,
-                   e_greedy=0.9)
+                   reward_decay=0.95,
+                   e_greedy=0.95)
 
 # 加载之前的模型
 # RL.load_qtable(qtable_path)

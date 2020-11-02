@@ -1,7 +1,8 @@
 import logging
 
 import coloredlogs
-
+import sys
+sys.path.append('..')
 from AlphaZero.Coach import Coach
 from ConnectXEnv.ConnectX_Game import ConnectX_AlphaZero as Game
 from AlphaZero.Net.NNet import NNetWrapper as nn

@@ -1,3 +1,5 @@
+import sys
+sys.path.append('..')
 from DQN.DQN_Net import DQN_Dense, DQN_Conv
 from ConnectXEnv.ConnectX_Game import ConnectX_Gym
 from tqdm import tqdm
