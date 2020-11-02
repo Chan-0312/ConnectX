@@ -294,7 +294,7 @@ class ConnectX_Gym(gym.Env):
                 return copy.deepcopy(self.observation), 1, done, {}
             else:
                 # 平局
-                return copy.deepcopy(self.observation), 1/(10*self.configuration['rows']*self.configuration['columns']), done, {}
+                return copy.deepcopy(self.observation), 1/(100*self.configuration['rows']*self.configuration['columns']), done, {}
 
         # 电脑下棋
         obs = copy.deepcopy(self.observation)
@@ -316,10 +316,10 @@ class ConnectX_Gym(gym.Env):
             else:
                 # 平局
                 return copy.deepcopy(self.observation), 1 / (
-                            10*self.configuration['rows'] * self.configuration['columns']), done, {}
+                            100*self.configuration['rows'] * self.configuration['columns']), done, {}
 
         return copy.deepcopy(self.observation), 1 / (
-                            10*self.configuration['rows'] * self.configuration['columns']), done, {}
+                            100*self.configuration['rows'] * self.configuration['columns']), done, {}
 
     # 重置环境
     def reset(self):
