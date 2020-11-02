@@ -7,7 +7,7 @@ import numpy as np
 import pickle
 
 
-rl_flag = 'Sarsa'    # rl_flag {'Sarsa', 'QLearning'}
+rl_flag = 'QLearning'    # rl_flag {'Sarsa', 'QLearning'}
 board_size = (4, 4)      # 棋盘尺寸
 qtable_path = './q_table44.pkl' # 模型保存路径
 display = False          # 是否显示棋盘
