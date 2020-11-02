@@ -5,12 +5,16 @@
 以下代理强度：
 rondom_agent < rule1_agent < rule2_agent
 '''
+import numpy as np
 
 
 '''
 # 纯随机的agent
 '''
 def rondom_agent(obs,conf):
+    obs = {'board': [i if i != -1 else 2 for i in obs.flatten().tolist()],
+           'mark': conf['mark']}
+
     from random import choice
     a = choice([i for i in range(conf['columns']) if obs['board'][i] == 0])
     return a
@@ -24,6 +28,9 @@ def rondom_agent(obs,conf):
 4、判断下下一步可能胜利的走法，没有就随机
 '''
 def rule1_agent(obs, conf):
+    obs = {'board': [i if i != -1 else 2 for i in obs.flatten().tolist()],
+           'mark': conf['mark']}
+
     import copy
     from random import choice
 
@@ -216,6 +223,9 @@ def rule1_agent(obs, conf):
 # kaggle大神(1200分)基于规则的agent，比我自己写的rule1_agent强
 '''
 def rule2_agent(obs, conf):
+
+    obs = {'board': [i if i != -1 else 2 for i in obs.flatten().tolist()],
+           'mark': conf['mark']}
 
     def get_results(x, y, mark, multiplier):
         """ get list of points, lowest cells and "in air" cells of a board[x][y] cell considering mark """

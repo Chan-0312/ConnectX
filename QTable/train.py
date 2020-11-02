@@ -42,7 +42,7 @@ for i in tqdm(range(1, episodes+1)):
     observation = env.reset()
 
     if rl_flag == 'Sarsa':
-        action = RL.choose_action(str(observation['board']))
+        action = RL.choose_action(str(observation.flatten().tolist()))
 
     while True:
 
@@ -51,7 +51,7 @@ for i in tqdm(range(1, episodes+1)):
             env.render()
 
         if rl_flag == 'QLearning':
-            action = RL.choose_action(str(observation['board']))
+            action = RL.choose_action(str(observation.flatten().tolist()))
 
         # 执行一次
         observation_, reward, done, _ = env.step(action)
@@ -65,10 +65,10 @@ for i in tqdm(range(1, episodes+1)):
 
         # 学习
         if rl_flag == 'Sarsa':
-            action_ = RL.choose_action(str(observation_))
-            RL.learn(str(observation['board']), action, reward, str(observation_['board']), action_)
+            action_ = RL.choose_action(str(observation_.flatten().tolist()))
+            RL.learn(str(observation.flatten().tolist()), action, reward, str(observation_.flatten().tolist()), action_)
         else:
-            RL.learn(str(observation['board']), action, reward, str(observation_['board']))
+            RL.learn(str(observation.flatten().tolist()), action, reward, str(observation_.flatten().tolist()))
 
         # 下一次迭代
         observation = observation_

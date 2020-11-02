@@ -8,7 +8,7 @@ class DQN_Net(object):
     def __init__(
             self,
             n_actions = 7,
-            n_features = 6,
+            n_features = 42,
             learning_rate=0.01,
             reward_decay=0.9,
             e_greedy=0.9,
@@ -20,7 +20,7 @@ class DQN_Net(object):
             output_graph=False,
     ):
         self.n_actions = n_actions    # 可选择的行为数量
-        self.n_features = n_features  # 环境变量个数
+        self.n_features = n_features    # 环境变量尺寸
         self.lr = learning_rate       # 学习速率
         self.gamma = reward_decay     # 回报衰减值
         self.epsilon_max = e_greedy   # 最大贪婪值
@@ -87,10 +87,10 @@ class DQN_Net(object):
         _, cost = self.sess.run(
             [self._train_op, self.loss],
             feed_dict={
-                self.s: batch_memory[:, :self.n_features[0]*self.n_features[1]],
-                self.a: batch_memory[:, self.n_features[0]*self.n_features[1]],
-                self.r: batch_memory[:, self.n_features[0]*self.n_features[1] + 1],
-                self.s_: batch_memory[:, -self.n_features[0]*self.n_features[1]:],
+                self.s: batch_memory[:, :self.n_features],
+                self.a: batch_memory[:, self.n_features],
+                self.r: batch_memory[:, self.n_features + 1],
+                self.s_: batch_memory[:, -self.n_features:],
             }
         )
 
@@ -117,7 +117,7 @@ class DQN_Dense(DQN_Net):
     def __init__(
             self,
             n_actions = 7,
-            n_features = 6,
+            n_features = 42,
             learning_rate=0.01,
             reward_decay=0.9,
             e_greedy=0.9,
@@ -242,7 +242,7 @@ class DQN_Conv(DQN_Net):
     def __init__(
             self,
             n_actions = 7,
-            n_features = 6,
+            n_features = 42,
             learning_rate=0.01,
             reward_decay=0.9,
             e_greedy=0.9,
@@ -261,7 +261,7 @@ class DQN_Conv(DQN_Net):
             % (learning_rate, reward_decay, e_greedy, replace_target_iter, memory_size, batch_size, e_greedy_increment))
 
         # 初始化记忆库 尺寸（memory_size，[s,a,r,s_]）
-        self.memory = np.zeros((self.memory_size, self.n_features[0]*self.n_features[1] * 2 + 2))
+        self.memory = np.zeros((self.memory_size, self.n_features * 2 + 2))
 
         # 创建神经网络 target_net,evaluate_net
         self.__build_net()
@@ -287,14 +287,14 @@ class DQN_Conv(DQN_Net):
         tf.reset_default_graph()
 
         # 所有的输入
-        self.s = tf.placeholder(dtype=tf.float32, shape=[None, self.n_features[0]*self.n_features[1]], name='s')  # 当前环境
-        self.s_ = tf.placeholder(dtype=tf.float32, shape=[None, self.n_features[0]*self.n_features[1]], name='s_')  # 下一个环境
+        self.s = tf.placeholder(dtype=tf.float32, shape=[None, self.n_features], name='s')  # 当前环境
+        self.s_ = tf.placeholder(dtype=tf.float32, shape=[None, self.n_features], name='s_')  # 下一个环境
         self.r = tf.placeholder(dtype=tf.float32, shape=[None, ], name='r')  # 奖励
         self.a = tf.placeholder(dtype=tf.float32, shape=[None, ], name='a')  # 选择行为
 
         # 修改输入维度
-        image_s = tf.reshape(self.s, shape=[-1, self.n_features[0], self.n_features[1], 1], name='image_s')
-        image_s_ = tf.reshape(self.s_, shape=[-1, self.n_features[0], self.n_features[1], 1], name='image_s_')
+        image_s = tf.reshape(self.s, shape=[-1, int(self.n_features/self.n_actions), self.n_actions, 1],  name='image_s')
+        image_s_ = tf.reshape(self.s_, shape=[-1, int(self.n_features/self.n_actions), self.n_actions, 1],  name='image_s_')
 
         # 构建evaluate网络
         with tf.variable_scope('eval_net'):

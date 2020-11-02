@@ -6,11 +6,11 @@ from tqdm import tqdm
 import numpy as np
 import pickle
 
-rl_flag = 'Conv'    # rl_flag {'Dense', 'Conv'}
+rl_flag = 'Dense'    # rl_flag {'Dense', 'Conv'}
 board_size = (6, 7)      # 棋盘尺寸
 model_path = './Dense_model' # 模型保存路径
 display = False          # 是否显示棋盘
-episodes = 500000        # 迭代次数
+episodes = 1000000        # 迭代次数
 
 
 env = ConnectX_Gym(rows=board_size[0], columns=board_size[1], inarow=4)
@@ -33,14 +33,14 @@ if rl_flag == 'Dense':
 else:
     RL = DQN_Conv(
             n_actions=board_size[1],
-            n_features=board_size,
+            n_features=board_size[0]*board_size[1],
             learning_rate=0.001,
             reward_decay=0.95,
             e_greedy=0.99,
             replace_target_iter=200,
             memory_size=50000,
             batch_size=64,
-            hidden_units=[32,64],
+            hidden_units=[32,128,256],
             e_greedy_increment=0.01
             # output_graph = False
         )
@@ -57,7 +57,7 @@ all_won_lost_rate = []
 for i in tqdm(range(1, episodes+1)):
     observation = env.reset()
 
-    observation = np.array(np.array(observation['board'])).reshape(-1)
+    observation = observation.reshape(-1)
 
     while True:
 
@@ -69,7 +69,7 @@ for i in tqdm(range(1, episodes+1)):
 
         # 执行一次
         observation_, reward, done, _ = env.step(action)
-        observation_ = np.array(np.array(observation_['board'])).reshape(-1)
+        observation_ = observation_.reshape(-1)
 
         # 存放最近50个回报值
         if len(rewards_50) < 50:

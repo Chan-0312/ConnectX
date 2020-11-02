@@ -242,24 +242,23 @@ class ConnectX_Gym(gym.Env):
 
         self.board = Board(height=rows, width=columns, win_length=inarow)
 
+        self.set_switch = switch
+        self.set_agent_level = agent_level
+
         # 环境配置
         self.configuration = {'rows': rows,
                               'columns': columns,
                               'inarow': inarow,
                               'agent_level': agent_level,
-                              'switch': switch,
+                              'mark': switch
                               }
-        # 环境
-        self.observation = {'board': [0] * rows * columns,  # 棋盘
-                            'mark': switch,  # 先后手标志
-                            }
 
         # 行为空间
         self.action_space = gym.spaces.Discrete(columns)
 
         # 环境空间
-        self.observation_space = gym.spaces.Box(low=0,
-                                                high=2,
+        self.observation_space = gym.spaces.Box(low=-1,
+                                                high=1,
                                                 shape=(rows, columns, 1),
                                                 dtype=np.int)
 
@@ -281,50 +280,47 @@ class ConnectX_Gym(gym.Env):
         # 无效的移动
         valid_moves = self.board.get_valid_moves()
         if valid_moves[action] == False:
-            return copy.deepcopy(self.observation), -10, True, {}
+            return self.board.np_pieces.reshape(self.observation_space.shape).copy(), -10, True, {}
 
-        self.board.add_stone(column=action, player=self.observation['mark'] if self.observation['mark'] != 2 else -1)
-        self.observation['board'] = [i if i != -1 else 2 for i in self.board.np_pieces.flatten().tolist()]
+        self.board.add_stone(column=action, player=self.configuration['mark'] if self.configuration['mark'] != 2 else -1)
 
         done, winner = self.board.get_win_state()
 
         # 玩家胜利
         if done:
             if winner != None:
-                return copy.deepcopy(self.observation), 1, done, {}
+                return self.board.np_pieces.reshape(self.observation_space.shape).copy(), 1, done, {}
             else:
                 # 平局
-                return copy.deepcopy(self.observation), 1/(100*self.configuration['rows']*self.configuration['columns']), done, {}
+                return self.board.np_pieces.reshape(self.observation_space.shape).copy(), 1/(100*self.configuration['rows']*self.configuration['columns']), done, {}
 
         # 电脑下棋
-        obs = copy.deepcopy(self.observation)
+        obs = self.board.np_pieces.reshape(self.observation_space.shape).copy()
         conf = copy.deepcopy(self.configuration)
-        obs['mark'] = 2 if self.observation['mark'] == 1 else 1
+        conf['mark'] = 2 if self.configuration['mark'] == 1 else 1
 
         action = agents[conf['agent_level']](obs, conf)
         self._robot_move = action
-        self.board.add_stone(action, player=obs['mark'] if obs['mark'] != 2 else -1)
-        self.observation['board'] = [i if i != -1 else 2 for i in self.board.np_pieces.flatten().tolist()]
-
+        self.board.add_stone(action, player=conf['mark'] if conf['mark'] != 2 else -1)
 
         done, winner = self.board.get_win_state()
 
         # 电脑胜利
         if done:
             if winner != None:
-                return copy.deepcopy(self.observation), -1, done, {}
+                return self.board.np_pieces.reshape(self.observation_space.shape).copy(), -1, done, {}
             else:
                 # 平局
-                return copy.deepcopy(self.observation), 1 / (
+                return self.board.np_pieces.reshape(self.observation_space.shape).copy(), 1 / (
                             100*self.configuration['rows'] * self.configuration['columns']), done, {}
 
-        return copy.deepcopy(self.observation), 1 / (
+        return self.board.np_pieces.reshape(self.observation_space.shape).copy(), 1 / (
                             100*self.configuration['rows'] * self.configuration['columns']), done, {}
 
     # 重置环境
     def reset(self):
-        switch = self.configuration['switch']
-        level = self.configuration['agent_level']
+        switch = self.set_switch
+        level = self.set_agent_level
         if switch == 1 or switch == 2:
             pass
         else:
@@ -351,10 +347,8 @@ class ConnectX_Gym(gym.Env):
             level = random.choice(range(len(agents)))
             pass
 
-        # 重置棋盘
-        self.observation = {'board': [0] * self.configuration['rows'] * self.configuration['columns'],  # 棋盘
-                            'mark': switch,  # 先后手标志
-                            }
+        self.configuration['mark'] = switch
+        self.configuration['agent_level'] = level
         # 重置棋盘
         self.board = self.board.with_np_pieces(np.zeros(shape=(self.configuration['rows'], self.configuration['columns']), dtype=np.int))
 
@@ -363,18 +357,17 @@ class ConnectX_Gym(gym.Env):
         # 机器人先手
         if switch == 2:
 
-            obs = copy.deepcopy(self.observation)
+            obs = self.board.np_pieces.reshape(self.observation_space.shape).copy()
             conf = copy.deepcopy(self.configuration)
-            obs['mark'] = 2 if self.observation['mark'] == 1 else 1
+            conf['mark'] = 2 if self.configuration['mark'] == 1 else 1
 
-            action = agents[conf['agent_level']](obs, conf)
+            action = agents[self.configuration['agent_level']](obs, conf)
 
             self._robot_move = action
 
-            self.board.add_stone(action, player=obs['mark'] if obs['mark'] != 2 else -1)
-            self.observation['board'] = [i if i != -1 else 2 for i in self.board.np_pieces.flatten().tolist()]
+            self.board.add_stone(action, player=conf['mark'] if conf['mark'] != 2 else -1)
 
-        return copy.deepcopy(self.observation)
+        return self.board.np_pieces.reshape(self.observation_space.shape).copy()
 
     # 绘制环境
     def render(self, mode='xsc', **kwargs):

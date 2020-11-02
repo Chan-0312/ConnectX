@@ -98,6 +98,6 @@ my_mcts.load_model(model_path)
 # play_with_human(mcts=my_mcts, player=1, round=1)
 
 # 和代理玩
-play_with_coumpter(mcts=my_mcts, round=5, agent_level=1, display=True)
+play_with_coumpter(mcts=my_mcts, round=1, agent_level=2, display=True)
 
 
