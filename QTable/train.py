@@ -11,7 +11,7 @@ rl_flag = 'QLearning'    # rl_flag {'Sarsa', 'QLearning'}
 board_size = (4, 4)      # 棋盘尺寸
 qtable_path = './q_table44.pkl' # 模型保存路径
 display = False          # 是否显示棋盘
-episodes = 10000000        # 迭代次数
+episodes = 5000000        # 迭代次数
 
 
 env = ConnectX_Gym(rows=board_size[0], columns=board_size[1], inarow=4)
@@ -32,7 +32,7 @@ else:
 # RL.load_qtable(qtable_path)
 
 state_count = [0, 0, 0, 0]  # 胜利，失败，错误，平局
-rewards_50 = [0]
+rewards_100mean = 0
 all_avg_rewards = []
 all_won_lost_rate = []
 all_qtable_rows = []
@@ -56,12 +56,8 @@ for i in tqdm(range(1, episodes+1)):
         # 执行一次
         observation_, reward, done, _ = env.step(action)
 
-        # 存放最近50个回报值
-        if len(rewards_50) < 50:
-            rewards_50.append(reward)
-        else:
-            rewards_50.pop(0)
-            rewards_50.append(reward)
+        # 存放最近100回报指之和
+        rewards_100mean += reward
 
         # 学习
         if rl_flag == 'Sarsa':
@@ -92,9 +88,12 @@ for i in tqdm(range(1, episodes+1)):
                 pickle.dump(all_qtable_rows, open('./all_qtable_rows.pkl', 'wb'))
                 pickle.dump(all_won_lost_rate, open('./all_won_lost_rate.pkl', 'wb'))
 
-            if i % 50 == 0:
-                won_lost_rate = [round(j/i, 3) for j in state_count]
-                all_avg_rewards.append(np.mean(rewards_50))
+            if i % 100 == 0:
+                # won_lost_rate = [round(j/i, 3) for j in state_count]
+                won_lost_rate = [round(j/100, 2) for j in state_count]
+                state_count = [0, 0, 0, 0]
+                all_avg_rewards.append(rewards_100mean/100)
+                rewards_100mean = 0
                 all_won_lost_rate.append(won_lost_rate)
                 all_qtable_rows.append(len(RL.q_table))
 

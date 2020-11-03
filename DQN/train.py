@@ -6,7 +6,7 @@ from tqdm import tqdm
 import numpy as np
 import pickle
 
-rl_flag = 'Dense'    # rl_flag {'Dense', 'Conv'}
+rl_flag = 'Conv'    # rl_flag {'Dense', 'Conv'}
 board_size = (6, 7)      # 棋盘尺寸
 model_path = './Dense_model' # 模型保存路径
 display = False          # 是否显示棋盘
@@ -40,7 +40,7 @@ else:
             replace_target_iter=200,
             memory_size=50000,
             batch_size=64,
-            hidden_units=[32,128,256],
+            hidden_units=[32,128],
             e_greedy_increment=0.01
             # output_graph = False
         )
@@ -49,7 +49,7 @@ else:
 # RL.load_model(model_path)
 
 state_count = [0, 0, 0, 0]  # 胜利，失败，错误，平局
-rewards_50 = [0]
+rewards_100mean = 0
 all_avg_rewards = []
 all_won_lost_rate = []
 
@@ -71,12 +71,8 @@ for i in tqdm(range(1, episodes+1)):
         observation_, reward, done, _ = env.step(action)
         observation_ = observation_.reshape(-1)
 
-        # 存放最近50个回报值
-        if len(rewards_50) < 50:
-            rewards_50.append(reward)
-        else:
-            rewards_50.pop(0)
-            rewards_50.append(reward)
+        # 存放最近100个回报值之和
+        rewards_100mean += reward
 
         # 学习
         RL.store_transition(observation, action, reward, observation_)
@@ -103,9 +99,12 @@ for i in tqdm(range(1, episodes+1)):
                 pickle.dump(all_avg_rewards, open('./all_avg_rewards.pkl', 'wb'))
                 pickle.dump(all_won_lost_rate, open('./all_won_lost_rate.pkl', 'wb'))
 
-            if i % 50 == 0:
-                won_lost_rate = [round(j/i, 3) for j in state_count]
-                all_avg_rewards.append(np.mean(rewards_50))
+            if i % 100 == 0:
+                # won_lost_rate = [round(j/i, 3) for j in state_count]
+                won_lost_rate = [round(j/100, 2) for j in state_count]
+                state_count = [0, 0, 0, 0]
+                all_avg_rewards.append(rewards_100mean/100)
+                rewards_100mean = 0
                 all_won_lost_rate.append(won_lost_rate)
 
                 print('|---------|', i, won_lost_rate,
