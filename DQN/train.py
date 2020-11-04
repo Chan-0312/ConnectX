@@ -6,7 +6,7 @@ from tqdm import tqdm
 import numpy as np
 import pickle
 
-rl_flag = 'Conv'    # rl_flag {'Dense', 'Conv'}
+rl_flag = 'Dense'    # rl_flag {'Dense', 'Conv'}
 board_size = (6, 7)      # 棋盘尺寸
 model_path = './Dense_model' # 模型保存路径
 display = False          # 是否显示棋盘
@@ -23,11 +23,11 @@ if rl_flag == 'Dense':
         learning_rate=0.001,
         reward_decay=0.95,
         e_greedy=0.99,
-        replace_target_iter=200,
+        replace_target_iter=5000,
         memory_size=50000,
         batch_size=64,
-        hidden_units=[128, 512, 512, 128],
-        e_greedy_increment=0.01
+        hidden_units=[64, 256, 1024],
+        e_greedy_increment=0.00005
         # output_graph = False
     )
 else:
@@ -77,7 +77,7 @@ for i in tqdm(range(1, episodes+1)):
         # 学习
         RL.store_transition(observation, action, reward, observation_)
 
-        if i > 50:
+        if (i > 5000) and (i % 10 == 0):
             RL.learn()
 
         # 下一次迭代
@@ -107,7 +107,7 @@ for i in tqdm(range(1, episodes+1)):
                 rewards_100mean = 0
                 all_won_lost_rate.append(won_lost_rate)
 
-                print('|---------|', i, won_lost_rate,
+                print('|---------|', i, won_lost_rate, RL.epsilon,
                       '%.1f' % all_avg_rewards[-1],
                       end='|---------|\n')
             break

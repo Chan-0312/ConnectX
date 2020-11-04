@@ -8,8 +8,8 @@ import pickle
 
 
 rl_flag = 'QLearning'    # rl_flag {'Sarsa', 'QLearning'}
-board_size = (4, 4)      # 棋盘尺寸
-qtable_path = './q_table44.pkl' # 模型保存路径
+board_size = (6, 7)      # 棋盘尺寸
+qtable_path = './q_table67.pkl' # 模型保存路径
 display = False          # 是否显示棋盘
 episodes = 5000000        # 迭代次数
 
@@ -21,12 +21,14 @@ if rl_flag == 'Sarsa':
     RL = Sarsa(action_scope=env.configuration['columns'],
                learning_rate=0.1,
                reward_decay=0.95,
-               e_greedy=0.95)
+               e_greedy_max=0.99,
+               e_greedy_increment=5/episodes)
 else:
     RL = QLearning(action_scope=env.configuration['columns'],
                    learning_rate=0.1,
                    reward_decay=0.95,
-                   e_greedy=0.95)
+                   e_greedy_max=0.99,
+                   e_greedy_increment=5/episodes)
 
 # 加载之前的模型
 # RL.load_qtable(qtable_path)
@@ -84,9 +86,9 @@ for i in tqdm(range(1, episodes+1)):
 
             if i % 10000 == 0:
                 RL.save_qtable(path=qtable_path)
-                pickle.dump(all_avg_rewards, open('./all_avg_rewards.pkl', 'wb'))
-                pickle.dump(all_qtable_rows, open('./all_qtable_rows.pkl', 'wb'))
-                pickle.dump(all_won_lost_rate, open('./all_won_lost_rate.pkl', 'wb'))
+                pickle.dump(all_avg_rewards, open('./all_avg_rewards_q67.pkl', 'wb'))
+                pickle.dump(all_qtable_rows, open('./all_qtable_rows_q67.pkl', 'wb'))
+                pickle.dump(all_won_lost_rate, open('./all_won_lost_rate_q67.pkl', 'wb'))
 
             if i % 100 == 0:
                 # won_lost_rate = [round(j/i, 3) for j in state_count]
@@ -97,7 +99,7 @@ for i in tqdm(range(1, episodes+1)):
                 all_won_lost_rate.append(won_lost_rate)
                 all_qtable_rows.append(len(RL.q_table))
 
-                print('|---------|', i, all_qtable_rows[-1],
+                print('|---------|', i, all_qtable_rows[-1], '%.3f'%RL.epsilon,
                       won_lost_rate,
                       '%.1f' % all_avg_rewards[-1],
                       end='|---------|\n')

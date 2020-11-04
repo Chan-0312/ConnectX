@@ -175,14 +175,18 @@ class DQN_Dense(DQN_Net):
                 if i == 0:
                     e = tf.layers.dense(inputs=self.s,
                                         units=units,
-                                        activation=tf.nn.tanh)
+                                        activation=tf.nn.relu)
                 else:
                     e = tf.layers.dense(inputs=self.eval_hidden_layers[-1],
                                         units=units,
-                                        activation=tf.nn.tanh)
-                self.eval_hidden_layers.append(e)
+                                        activation=tf.nn.relu)
 
-            self.q_eval = tf.layers.dense(inputs=self.eval_hidden_layers[-1],
+                bn_e = tf.layers.batch_normalization(inputs=e)
+
+                self.eval_hidden_layers.append(bn_e)
+
+
+            self.q_eval = tf.layers.dense(inputs=self.eval_hidden_layers[-1] ,
                                           units=self.n_actions,
                                           activation=None,
                                           name='q_eval')
@@ -194,12 +198,16 @@ class DQN_Dense(DQN_Net):
                 if i == 0:
                     t = tf.layers.dense(inputs=self.s_,
                                         units=units,
-                                        activation=tf.nn.tanh)
+                                        activation=tf.nn.relu)
                 else:
                     t = tf.layers.dense(inputs=self.target_hidden_layers[-1],
                                         units=units,
-                                        activation=tf.nn.tanh)
-                self.target_hidden_layers.append(t)
+                                        activation=tf.nn.relu)
+                # 批量归一化
+                bn_t = tf.layers.batch_normalization(inputs=t)
+
+                self.target_hidden_layers.append(bn_t)
+
 
             self.q_next = tf.layers.dense(inputs=self.target_hidden_layers[-1],
                                           units=self.n_actions,
@@ -312,7 +320,10 @@ class DQN_Conv(DQN_Net):
                                          filters=units,
                                          padding='valid',
                                          activation=tf.nn.tanh)
-                self.eval_hidden_layers.append(e)
+
+                bn_e = tf.layers.batch_normalization(inputs=e)
+
+                self.eval_hidden_layers.append(bn_e)
 
             e_input_shape = self.eval_hidden_layers[-1].get_shape().as_list()
             e_n_input_units = np.prod(e_input_shape[1:])
@@ -343,7 +354,10 @@ class DQN_Conv(DQN_Net):
                                          filters=units,
                                          padding='valid',
                                          activation=tf.nn.tanh)
-                self.target_hidden_layers.append(t)
+
+                bn_t = tf.layers.batch_normalization(inputs=t)
+
+                self.target_hidden_layers.append(bn_t)
 
             t_input_shape = self.target_hidden_layers[-1].get_shape().as_list()
             t_n_input_units = np.prod(t_input_shape[1:])

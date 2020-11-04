@@ -9,13 +9,19 @@ class QTable(object):
                  action_scope=7,        # 行为范围
                  learning_rate=0.1,     # 学习率
                  reward_decay=0.9,      # 回报衰退因子
-                 e_greedy=0.9,          # 贪婪因子
+                 e_greedy_max=0.99,          # 贪婪因子
+                 e_greedy_increment=None   # 贪婪因子增加值
                  ):
 
         self.action_scope = action_scope
         self.lr = learning_rate
         self.gamma = reward_decay
-        self.epsilon = e_greedy
+
+        if e_greedy_increment == None:
+            self.epsilon = e_greedy_max
+        else:
+            self.epsilon = 0
+
         self.q_table = dict()
 
     # 选择行为, observation要为字符串形式
@@ -66,10 +72,13 @@ class QLearning(QTable):
                  action_scope=7,        # 行为范围
                  learning_rate=0.1,     # 学习率
                  reward_decay=0.9,      # 回报衰退因子
-                 e_greedy=0.9,          # 贪婪因子
+                 e_greedy_max=0.99,  # 贪婪因子
+                 e_greedy_increment=None  # 贪婪因子增加值
                  ):
-        super(QLearning, self).__init__(action_scope, learning_rate, reward_decay, e_greedy)
-        print('QLearning - lr:%f,reward_decay:%f,e_greedy:%f'%(learning_rate,reward_decay,e_greedy))
+        super(QLearning, self).__init__(action_scope, learning_rate, reward_decay, e_greedy_max, e_greedy_increment)
+        print('QLearning - lr:%f,reward_decay:%f,e_greedy_max:%f'%(learning_rate,reward_decay,e_greedy_max))
+        self.epsilon_max = e_greedy_max
+        self.epsilon_increment = e_greedy_increment
 
     # 学习训练
     def learn(self, s, a, r, s_):
@@ -79,6 +88,9 @@ class QLearning(QTable):
 
         self.q_table[s][a] += self.lr * (q_target - q_predict)  # update
 
+        self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
+
+
 
 # Sarsa类
 class Sarsa(QTable):
@@ -87,10 +99,13 @@ class Sarsa(QTable):
                  action_scope=7,        # 行为范围
                  learning_rate=0.1,     # 学习率
                  reward_decay=0.9,      # 回报衰退因子
-                 e_greedy=0.9,          # 贪婪因子
+                 e_greedy_max=0.99,     # 贪婪因子
+                 e_greedy_increment=None  # 贪婪因子增加值
                  ):
-        super(Sarsa, self).__init__(action_scope, learning_rate, reward_decay, e_greedy)
-        print('Sarsa - lr:%f,reward_decay:%f,e_greedy:%f'%(learning_rate,reward_decay,e_greedy))
+        super(Sarsa, self).__init__(action_scope, learning_rate, reward_decay, e_greedy_max, e_greedy_increment)
+        print('Sarsa - lr:%f,reward_decay:%f,e_greedy_max:%f'%(learning_rate,reward_decay, e_greedy_max))
+        self.epsilon_max = e_greedy_max
+        self.epsilon_increment = e_greedy_increment
 
     # 学习训练
     def learn(self, s, a, r, s_, a_):
@@ -98,3 +113,6 @@ class Sarsa(QTable):
         q_predict = self.q_table[s][a]
         q_target = r + self.gamma * self.q_table[s_][a_]
         self.q_table[s][a] += self.lr * (q_target - q_predict)
+
+        self.epsilon = self.epsilon + self.epsilon_increment if self.epsilon < self.epsilon_max else self.epsilon_max
+
